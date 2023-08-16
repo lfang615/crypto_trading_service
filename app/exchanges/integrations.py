@@ -18,7 +18,7 @@ class AbstractExchange(ABC):
             raise ValueError(f"Unsupported exchange: {name}")    
 
     @abstractmethod
-    def submit_order(self, order_type: str, symbol: str, price: float, quantity: float) -> dict:
+    def place_order(self, order:PlaceOrderBase) -> dict:
         pass
 
     @abstractmethod
@@ -30,13 +30,42 @@ class AbstractExchange(ABC):
         pass
 
 class BitgetExchange(AbstractExchange):
+    def __init__(self, api_key: str, api_secret: str):
+        super().__init__(api_key, api_secret)
+        self.exchange = ccxt.bitget({
+            'apiKey': self.api_key,
+            'secret': self.api_secret,
+        })
+
+    def place_order(self, order: PlaceOrderBase) -> dict:
+        # Implement the method using ccxt's functions for Bitget
+        pass
+
+    def get_balance(self) -> dict:
+        # Implement the method using ccxt's functions for Bitget
+        pass
+
+    def set_leverage(self, leverage: int) -> dict:
+        # Implement the method using ccxt's functions for Bitget
+        pass
+
+class BybitExchange(AbstractExchange):
+    def __init__(self, api_key: str, api_secret: str):
+        super().__init__(api_key, api_secret)
+        self.exchange = ccxt.bybit({
+            'apiKey': self.api_key,
+            'secret': self.api_secret,
+    })
+    
     def place_order(self, order: PlaceOrderBase) -> dict:
         # Use `ccxt` to construct the order and send it to the Bitget exchange
         # Convert the response into a standard format (e.g., {"status": OrderStatus.OPEN})
         pass
 
-class BybitExchange(AbstractExchange):
-    def place_order(self, order: PlaceOrderBase) -> dict:
-        # Use `ccxt` to construct the order and send it to the Bitget exchange
-        # Convert the response into a standard format (e.g., {"status": OrderStatus.OPEN})
+    def get_balance(self) -> dict:
+        # Implement the method using ccxt's functions for Bitget
+        pass
+
+    def set_leverage(self, leverage: int) -> dict:
+        # Implement the method using ccxt's functions for Bitget
         pass
