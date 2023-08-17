@@ -2,15 +2,15 @@ from datetime import timedelta
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from app.auth.jwt import create_access_token, verify_password
-from app.db.crud import get_user
+from app.dependencies import get_user_repository
 from app.auth.jwt import Token
 from app.core import config
 
 router = APIRouter()
 
 @router.post("/token", response_model=Token)
-async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
-    user = await get_user(form_data.username)
+async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), user_repository = Depends(get_user_repository)):
+    user = await user_repository.get(form_data.username)
     if not user:
         raise HTTPException(status_code=400, detail="Incorrect username or password")
     
