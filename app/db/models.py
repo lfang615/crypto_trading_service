@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Optional, List
 from uuid import uuid4
-from pydantic import BaseModel, Field, root_validator
+from pydantic import BaseModel, Field, model_validator
 
 
 class Exchange(str, Enum):
@@ -67,7 +67,7 @@ class PlaceOrderBase(BaseModel):
     stopLoss: Optional[float] = Field(None)
     exchangeSpecificParams: Optional[dict] = Field(None)
 
-    @root_validator
+    @model_validator(mode='before')
     def check_order_validations(cls, values):
         order_type = values.get("type")
         amount = values.get("amount")
