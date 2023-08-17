@@ -39,7 +39,7 @@ class BitgetExchange(AbstractExchange):
 
     def place_order(self, order: PlaceOrderBase) -> dict:
         # Implement the method using ccxt's functions for Bitget
-        pass
+        return {"status_code": "NEW"}
 
     def get_balance(self) -> dict:
         # Implement the method using ccxt's functions for Bitget
@@ -60,7 +60,7 @@ class BybitExchange(AbstractExchange):
     def place_order(self, order: PlaceOrderBase) -> dict:
         # Use `ccxt` to construct the order and send it to the Bitget exchange
         # Convert the response into a standard format (e.g., {"status": OrderStatus.OPEN})
-        pass
+        return {"status_code": "NEW"}
 
     def get_balance(self) -> dict:
         # Implement the method using ccxt's functions for Bitget
