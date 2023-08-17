@@ -1,7 +1,27 @@
 from enum import Enum
-from typing import Optional
+from typing import Optional, List
 from pydantic import BaseModel, Field
 
+
+class Exchange(str, Enum):
+    BITGET = "bitget"
+    BYBIT = "bybit"
+
+class ExchangeCredentials(BaseModel):
+    user_id: str
+    name: Exchange
+    api_key: str
+    api_secret: str
+
+class User(BaseModel):
+    username: str
+
+class UserInDB(User):
+    _id: str    
+    hashed_password: str
+    api_key: str
+    api_secret: str
+    exchanges: List[ExchangeCredentials]
 
 class OrderSide(str, Enum):
     BUY = "buy"
@@ -20,7 +40,7 @@ class OrderStatus(str, Enum):
     CLOSED = "closed"
     CANCELLED = "cancelled"
     EXPIRED = "expired"
-    REJECTED = "rejected"    
+    REJECTED = "rejected"
 
 class TimeInForce(str, Enum):
     GoodTillCancel = "GTC"
@@ -37,6 +57,7 @@ class PlaceOrderBase(BaseModel):
     side: OrderSide    
     amount: float
     positionAction: PositionAction
+    exchange: Exchange
     price: Optional[float] = Field(None)    
     triggerPrice: Optional[float] = Field(None)
     clientOrderId: Optional[str] = Field(None)
