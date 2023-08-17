@@ -1,6 +1,7 @@
 from enum import Enum
 from typing import Optional, List
-from pydantic import BaseModel, Field
+from uuid import uuid4
+from pydantic import BaseModel, Field, root_validator
 
 
 class Exchange(str, Enum):
@@ -60,8 +61,33 @@ class PlaceOrderBase(BaseModel):
     exchange: Exchange
     price: Optional[float] = Field(None)    
     triggerPrice: Optional[float] = Field(None)
-    clientOrderId: Optional[str] = Field(None)
+    clientOrderId: str = Field(default_factory=lambda: str(uuid4()))
     timeInForce: Optional[TimeInForce] = Field(None)
     takeProfit: Optional[float] = Field(None)
     stopLoss: Optional[float] = Field(None)
     exchangeSpecificParams: Optional[dict] = Field(None)
+
+    @root_validator
+    def check_order_validations(cls, values):
+        order_type = values.get("type")
+        amount = values.get("amount")
+        price = values.get("price")
+        trigger_price = values.get("triggerPrice")
+        
+        # If the order_type == limit and 'amount' is None or 'price' is None
+        if order_type == OrderType.LIMIT and (amount is None or price is None):
+            raise ValueError("For LIMIT order type, both amount and price must be provided.")
+        
+        # If order_type is 'market' and 'price' is not None
+        if order_type == OrderType.MARKET and price is not None:
+            raise ValueError("For MARKET order type, price should not be provided.")
+        
+        # If order_type is stop_limit or stop_market and amount is None or price is None or trigger_price is None
+        if order_type in [OrderType.STOP_LIMIT, OrderType.STOP_MARKET] and (amount is None or price is None or trigger_price is None):
+            raise ValueError("For STOP_LIMIT or STOP_MARKET order types, amount, price, and trigger price must all be provided.")
+        
+        # If order_type is take_profit_stop_loss and trigger_price is None
+        if order_type == OrderType.TAKE_PROFIT_STOP_LOSS and trigger_price is None:
+            raise ValueError("For TAKE_PROFIT_STOP_LOSS order type, trigger price must be provided.")
+        
+        return values
