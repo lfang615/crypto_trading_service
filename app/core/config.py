@@ -1,0 +1,8 @@
+from decouple import config
+
+MONGODB_URI = config('MONGODB_URI')
+MONGODB_DB = config("MONGODB_DB")
+SECRET_KEY = config('SECRET_KEY')
+ALGORITHM = config('ALGORITHM')
+ACCESS_TOKEN_EXPIRE_MINUTES = config('ACCESS_TOKEN_EXPIRE_MINUTES')
+
