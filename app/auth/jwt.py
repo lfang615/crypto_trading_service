@@ -10,6 +10,7 @@ from pydantic import BaseModel
 from app.core import config
 from app.db.models import UserInDB
 from app.dependencies import get_user_repository
+from app.main import logger_instance
 
 
 # For hashing and verifying passwords
@@ -53,10 +54,12 @@ async def get_current_user(token: str = Depends(oauth2_scheme), user_repository 
         if username is None:
             raise credentials_exception
         token_data = TokenData(username=username)
-    except JWTError:
+    except JWTError:        
+        logger_instance.with_traceback("Error while decoding token")
         raise credentials_exception
     user = await user_repository.get(username=token_data.username)
     if user is None:
+        logger_instance.with_traceback("User not found")
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     return user
 
