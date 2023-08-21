@@ -18,7 +18,7 @@ class User(BaseModel):
     username: str
 
 class UserInDB(User):
-    _id: str    
+    id: str
     hashed_password: str
     api_key: str
     api_secret: str
@@ -83,11 +83,35 @@ class PlaceOrderBase(BaseModel):
             raise ValueError("For MARKET order type, price should not be provided.")
         
         # If order_type is stop_limit or stop_market and amount is None or price is None or trigger_price is None
-        if order_type in [OrderType.STOP_LIMIT, OrderType.STOP_MARKET] and (amount is None or price is None or trigger_price is None):
+        if order_type == OrderType.STOP_LIMIT and (amount is None or price is None or trigger_price is None):
             raise ValueError("For STOP_LIMIT or STOP_MARKET order types, amount, price, and trigger price must all be provided.")
+        
+        if order_type == OrderType.STOP_MARKET and (amount is None or trigger_price is None):
+            raise ValueError("For STOP_MARKET order type, amount and trigger price must be provided.")
         
         # If order_type is take_profit_stop_loss and trigger_price is None
         if order_type == OrderType.TAKE_PROFIT_STOP_LOSS and trigger_price is None:
             raise ValueError("For TAKE_PROFIT_STOP_LOSS order type, trigger price must be provided.")
         
         return values
+    
+class OrderStructure(BaseModel):
+    id: str
+    clientOrderId: str
+    datetime: Optional[str] = Field(None)
+    timestamp: Optional[int] = Field(None)
+    lastTradeTimestamp: Optional[int] = Field(None)
+    status: Optional[str] = Field(None)
+    symbol: str = Field(None)
+    type: Optional[str] = Field(None)
+    timeInForce: Optional[str] = Field(None)
+    side: Optional[str] = Field(None)
+    price: Optional[float] = Field(None)
+    average: Optional[float] = Field(None)
+    amount: Optional[float] = Field(None)
+    filled: Optional[float] = Field(None)
+    remaining: Optional[float] = Field(None)
+    cost: Optional[float] = Field(None)
+    trades: Optional[list] = Field(None)
+    fee: Optional[dict] = Field(None)
+    info: Optional[dict] = Field(None)

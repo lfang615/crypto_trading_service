@@ -3,11 +3,12 @@ from fastapi import FastAPI
 from httpx import AsyncClient
 from typing import Optional
 from app.main import app as fastapi_app
-from app.db.models import UserInDB, PlaceOrderBase, OrderSide, OrderType, PositionAction, Exchange, TimeInForce
+from app.db.models import UserInDB, PlaceOrderBase, OrderSide, OrderType, PositionAction, Exchange, TimeInForce, ExchangeCredentials
 from app.auth.jwt import create_access_token
 from unittest.mock import AsyncMock, MagicMock, patch
 from app.db.services.mongodbservice import AsyncMongoDBService
 from app.db.repositories.userrepository import UserRepository
+import json
 
 @pytest.fixture
 def app() -> FastAPI:
@@ -20,7 +21,12 @@ async def client(app: FastAPI):
 
 @pytest.fixture
 def test_user() -> UserInDB:
-    return UserInDB(username="testuser", hashed_password="$2b$12$Kb6vlfMV36Qg1T0DDZJP2uGZyHDUxSjtZJN.MEKEYE3iS1wBxM7Ae", api_key="test_api_key", api_secret="test_api_secret")
+    return UserInDB(id="test_id",
+                    username="testuser", 
+                    hashed_password="$2b$12$Kb6vlfMV36Qg1T0DDZJP2uGZyHDUxSjtZJN.MEKEYE3iS1wBxM7Ae", 
+                    api_key="test_api_key", 
+                    api_secret="test_api_secret",
+                    exchanges=[ExchangeCredentials(user_id="test_id", name=Exchange.BITGET, api_key="test_api_key", api_secret="test_api_secret") ])
 
 @pytest.fixture
 def test_user_token(test_user: UserInDB) -> str:
@@ -60,9 +66,9 @@ def mock_create_user(monkeypatch, mock_db_service: AsyncMongoDBService):
     return UserRepository(mock_db_service)
 
 @pytest.fixture
-def limit_order() -> dict:    
+def limit_order() -> json:    
     return {
-        "symbol": "BTC/USD",
+        "symbol": "BTCUSDT",
         "type": OrderType.LIMIT.value,  # assuming you have the OrderType enum defined
         "side": OrderSide.BUY.value,
         "amount": 0.1,
@@ -73,10 +79,6 @@ def limit_order() -> dict:
         "clientOrderId": "test_order_123",
         "timeInForce": TimeInForce.GoodTillCancel.value,  # assuming you have the TimeInForce enum defined
         "takeProfit": 37000.00,
-        "stopLoss": 33000.00,
-        "exchangeSpecificParams": {
-            "customParam1": "value1",
-            "customParam2": "value2"
-        }
+        "stopLoss": 33000.00        
 }
     

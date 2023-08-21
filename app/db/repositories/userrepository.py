@@ -23,7 +23,7 @@ class UserRepository(BaseRepository):
         exchange_credentials = await self._db_service.find(self.EXCHANGE_COLLECTION_NAME, {"user_id": user_id}).to_list()
 
         # Convert ObjectId to string for serialization
-        user_data["_id"] = str(user_data["_id"])
+        user_data["id"] = str(user_data["_id"])
         
         # Attach the exchange credentials to the user data
         user_data["exchanges"] = exchange_credentials
