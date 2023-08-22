@@ -9,7 +9,7 @@ class AsyncMongoDBService:
     def __init__(self, uri=config.MONGODB_URI, database_name=config.MONGODB_DB):
         self._client = AsyncIOMotorClient(uri)
         self._db: AsyncIOMotorDatabase = self._client[database_name]
-        self._logger = AsyncLogger().get_logger(__name__)
+        self._logger = AsyncLogger()
 
     def get_collection(self, collection_name: str) -> AsyncIOMotorCollection:
         return self._db[collection_name]

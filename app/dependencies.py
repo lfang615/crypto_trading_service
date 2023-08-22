@@ -1,7 +1,7 @@
 from fastapi import Depends
 from typing import Union
 from app.core import config
-import app.main as main
+from app.core.logging import AsyncLogger
 from app.db.models import UserInDB, PlaceOrderBase, ExchangeCredentials
 from app.db.services.mongodbservice import AsyncMongoDBService
 from app.db.repositories.userrepository import UserRepository
@@ -28,11 +28,11 @@ async def get_current_user(token: str = Depends(oauth2_scheme), user_repository 
             raise credentials_exception
         token_data = TokenData(username=username)
     except JWTError:        
-        main.logger_instance.with_traceback("Error while decoding token")
+        AsyncLogger().get_logger().logger_instance.with_traceback("Error while decoding token")
         raise credentials_exception
     user = await user_repository.get(username=token_data.username)
     if user is None:
-        main.logger_instance.with_traceback("User not found")
+        AsyncLogger().get_logger().logger_instance.with_traceback("User not found")
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     return user
 
