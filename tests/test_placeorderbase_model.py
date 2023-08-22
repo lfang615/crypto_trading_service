@@ -87,6 +87,32 @@ def test_invalid_stop_limit_order_missing_trigger_price():
     with pytest.raises(ValidationError):
         PlaceOrderBase(**data)
 
+def test_valid_stop_market_order():
+    # Valid Stop Market Order
+    data = {
+        "symbol": "BTC/USD",
+        "type": OrderType.STOP_MARKET,
+        "side": OrderSide.BUY,
+        "amount": 0.1,
+        "positionAction": PositionAction.OPEN,
+        "exchange": Exchange.BITGET,
+        "triggerPrice": 34000.00
+    }
+    assert PlaceOrderBase(**data)
+
+def test_invalid_stop_market_order_missing_trigger_price():
+    # Stop Market Order missing trigger price
+    data = {
+        "symbol": "BTC/USD",
+        "type": OrderType.STOP_MARKET,
+        "side": OrderSide.BUY,
+        "amount": 0.1,
+        "positionAction": PositionAction.OPEN,
+        "exchange": Exchange.BITGET
+    }
+    with pytest.raises(ValidationError):
+        PlaceOrderBase(**data)
+
 
 def test_valid_take_profit_stop_loss_order():
     # Valid Take Profit Stop Loss Order

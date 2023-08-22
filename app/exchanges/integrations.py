@@ -1,6 +1,6 @@
 import ccxt
 from abc import ABC, abstractmethod
-from app.db.models import PlaceOrderBase
+from app.db.models import PlaceOrderBase, OrderStructure, OrderType, OrderStatus
 
 class AbstractExchange(ABC):
 
@@ -15,18 +15,47 @@ class AbstractExchange(ABC):
         elif name == "bybit":
             return BybitExchange(api_key, api_secret)
         else:
-            raise ValueError(f"Unsupported exchange: {name}")    
+            raise ValueError(f"Unsupported exchange: {name}")
+    
+    async def place_order(self, order:PlaceOrderBase) -> OrderStructure:
+        match order.type:
+            case OrderType.MARKET:
+                return await self.place_market_order(order)
+            case OrderType.LIMIT:
+                return await self.place_limit_order(order)
+            case OrderType.STOP_LIMIT:
+                return await self.place_stop_limit_order(order)
+            case OrderType.STOP_MARKET:
+                return await self.place_stop_market_order(order)
+            case OrderType.TAKE_PROFIT_STOP_LOSS:
+                return await self.place_tpsl_order(order)
 
     @abstractmethod
-    def place_order(self, order:PlaceOrderBase) -> dict:
+    async def place_market_order(self, order: PlaceOrderBase) -> dict:
         pass
 
     @abstractmethod
-    def get_balance(self) -> dict:
+    async def place_limit_order(self, order: PlaceOrderBase) -> dict:
         pass
 
     @abstractmethod
-    def set_leverage(self, leverage: int) -> dict:
+    async def place_stop_limit_order(self, order: PlaceOrderBase) -> dict:
+        pass
+
+    @abstractmethod
+    async def place_stop_market_order(self, order: PlaceOrderBase) -> dict:
+        pass
+
+    @abstractmethod
+    async def place_tpsl_order(self, order: PlaceOrderBase) -> dict:
+        pass
+
+    @abstractmethod
+    async def get_balance(self) -> dict:
+        pass
+
+    @abstractmethod
+    async def set_leverage(self, leverage: int) -> dict:
         pass
 
 class BitgetExchange(AbstractExchange):
@@ -37,15 +66,26 @@ class BitgetExchange(AbstractExchange):
             'secret': self.api_secret,
         })
 
-    def place_order(self, order: PlaceOrderBase) -> dict:
-        # Implement the method using ccxt's functions for Bitget
-        return {"status_code": "NEW"}
+    async def place_market_order(self, order: PlaceOrderBase) -> OrderStructure:
+        return super().place_market_order(order)
+    
+    async def place_limit_order(self, order: PlaceOrderBase) -> OrderStructure:
+        return super().place_limit_order(order)
+    
+    async def place_stop_limit_order(self, order: PlaceOrderBase) -> OrderStructure:
+        return super().place_stop_limit_order(order)
+    
+    async def place_stop_market_order(self, order: PlaceOrderBase) -> OrderStructure:
+        return super().place_stop_market_order(order)
+    
+    async def place_tpsl_order(self, order: PlaceOrderBase) -> OrderStructure:
+        return super().place_tpsl_order(order)
 
-    def get_balance(self) -> dict:
+    async def get_balance(self) -> dict:
         # Implement the method using ccxt's functions for Bitget
         pass
 
-    def set_leverage(self, leverage: int) -> dict:
+    async def set_leverage(self, leverage: int) -> dict:
         # Implement the method using ccxt's functions for Bitget
         pass
 
@@ -57,15 +97,25 @@ class BybitExchange(AbstractExchange):
             'secret': self.api_secret,
     })
     
-    def place_order(self, order: PlaceOrderBase) -> dict:
-        # Use `ccxt` to construct the order and send it to the Bitget exchange
-        # Convert the response into a standard format (e.g., {"status": OrderStatus.OPEN})
-        return {"status_code": "NEW"}
+    async def place_market_order(self, order: PlaceOrderBase) -> OrderStructure:
+        return super().place_market_order(order)
+    
+    async def place_limit_order(self, order: PlaceOrderBase) -> OrderStructure:
+        return super().place_limit_order(order)
+    
+    async def place_stop_limit_order(self, order: PlaceOrderBase) -> OrderStructure:
+        return super().place_stop_limit_order(order)
+    
+    async def place_stop_market_order(self, order: PlaceOrderBase) -> OrderStructure:
+        return super().place_stop_market_order(order)
+    
+    async def place_tpsl_order(self, order: PlaceOrderBase) -> OrderStructure:
+        return super().place_tpsl_order(order)
 
-    def get_balance(self) -> dict:
+    async def get_balance(self) -> dict:
         # Implement the method using ccxt's functions for Bitget
         pass
 
-    def set_leverage(self, leverage: int) -> dict:
+    async def set_leverage(self, leverage: int) -> dict:
         # Implement the method using ccxt's functions for Bitget
         pass
