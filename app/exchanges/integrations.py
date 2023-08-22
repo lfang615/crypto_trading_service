@@ -31,23 +31,23 @@ class AbstractExchange(ABC):
                 return await self.place_tpsl_order(order)
 
     @abstractmethod
-    async def place_market_order(self, order: PlaceOrderBase) -> dict:
+    async def place_market_order(self, order: PlaceOrderBase) -> OrderStructure:
         pass
 
     @abstractmethod
-    async def place_limit_order(self, order: PlaceOrderBase) -> dict:
+    async def place_limit_order(self, order: PlaceOrderBase) -> OrderStructure:
         pass
 
     @abstractmethod
-    async def place_stop_limit_order(self, order: PlaceOrderBase) -> dict:
+    async def place_stop_limit_order(self, order: PlaceOrderBase) -> OrderStructure:
         pass
 
     @abstractmethod
-    async def place_stop_market_order(self, order: PlaceOrderBase) -> dict:
+    async def place_stop_market_order(self, order: PlaceOrderBase) -> OrderStructure:
         pass
 
     @abstractmethod
-    async def place_tpsl_order(self, order: PlaceOrderBase) -> dict:
+    async def place_tpsl_order(self, order: PlaceOrderBase) -> OrderStructure:
         pass
 
     @abstractmethod
