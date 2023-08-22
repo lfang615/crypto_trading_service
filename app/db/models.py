@@ -62,10 +62,9 @@ class PlaceOrderBase(BaseModel):
     price: Optional[float] = Field(None)    
     triggerPrice: Optional[float] = Field(None)
     clientOrderId: str = Field(default_factory=lambda: str(uuid4()))
-    timeInForce: Optional[TimeInForce] = Field(None)
+    timeInForce: Optional[TimeInForce] = Field(default=TimeInForce.GoodTillCancel)
     takeProfit: Optional[float] = Field(None)
-    stopLoss: Optional[float] = Field(None)
-    exchangeSpecificParams: Optional[dict] = Field(None)
+    stopLoss: Optional[float] = Field(None)    
 
     @model_validator(mode='before')
     def check_order_validations(cls, values):
