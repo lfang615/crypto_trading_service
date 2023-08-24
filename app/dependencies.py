@@ -1,4 +1,4 @@
-from fastapi import Depends
+from fastapi import Depends, HTTPException
 from typing import Union
 from app.core import config
 from app.core.logging import AsyncLogger
@@ -6,6 +6,7 @@ from app.db.models import UserInDB, PlaceOrderBase, ExchangeCredentials
 from app.db.services.mongodbservice import AsyncMongoDBService
 from app.db.repositories.userrepository import UserRepository
 from app.auth.jwt import oauth2_scheme, TokenData, JWTError, jwt, HTTPException, status
+from app.db.services.redisservice import AsyncRedisService as redis_service
 
 
 def get_db_service() -> AsyncMongoDBService:
@@ -46,4 +47,8 @@ def get_exchange_credentials(order: PlaceOrderBase,
         raise HTTPException(status_code=404, detail="Exchange credentials not found")
     return matching_exchange
 
-
+async def has_open_position(order: PlaceOrderBase, current_user: UserInDB = Depends(get_current_user)) -> bool:
+    cached_position = await redis_service.get_position(current_user.id, order.exchange.value, order.symbol, order.side.value)
+    if cached_position is None: 
+        raise HTTPException(status_code=400, detail="No open position for the given symbol.")
+    return True

@@ -59,12 +59,12 @@ class PlaceOrderBase(BaseModel):
     amount: float
     positionAction: PositionAction
     exchange: Exchange
-    price: Optional[float] = Field(None)    
-    triggerPrice: Optional[float] = Field(None)
+    price: Optional[float] = Field(default=None)    
+    triggerPrice: Optional[float] = Field(default=None)
     clientOrderId: str = Field(default_factory=lambda: str(uuid4()))
     timeInForce: Optional[TimeInForce] = Field(default=TimeInForce.GoodTillCancel)
-    takeProfit: Optional[float] = Field(None)
-    stopLoss: Optional[float] = Field(None)    
+    takeProfit: Optional[float] = Field(default=None)
+    stopLoss: Optional[float] = Field(default=None)
 
     @model_validator(mode='before')
     def check_order_validations(cls, values):
@@ -114,3 +114,29 @@ class OrderStructure(BaseModel):
     trades: Optional[list] = Field(None)
     fee: Optional[dict] = Field(None)
     info: Optional[dict] = Field(None)
+
+class PositionStructure(BaseModel):
+    exchange: Exchange
+    info: object
+    id: str
+    symbol: str
+    timestamp: int
+    datetime: str
+    isolated: bool
+    hedged: bool
+    side: str
+    contracts: int
+    contractSize: int
+    entryPrice: float
+    markPrice: float
+    notional: float # the value of the position in the settlement currency
+    leverage: float
+    collateral: float
+    initialMargin: float
+    maintenanceMargin: float
+    initialMarginPercentage: float
+    maintenanceMarginPercentage: float
+    unrealizedPnl: float # differncebetween the market price and entry price * qty
+    liquidationPrice: float # price at which collateral < maintenanceMargin (NUKED)
+    marginMode: str # crossed or isolated
+    percentage: float # represents unrealizedPnl / initialMargin
