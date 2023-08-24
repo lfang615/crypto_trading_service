@@ -1,6 +1,7 @@
 import logging
 import sys
 import json
+from app.core import config
 
 class JSONFormatter(logging.Formatter):
     def format(self, record):
@@ -21,26 +22,18 @@ class AsyncLogHandler(logging.Handler):
         sys.stdout.write(log_entry + "\n")
         sys.stdout.flush()
 
-class AsyncLogger:
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    async def emit(self, record):
-        log_entry = self.format(record)
-        sys.stdout.write(log_entry + "\n")
-        sys.stdout.flush()
 
 class AsyncLogger:
     _instance = None
-
+    _logger: AsyncLogHandler = None
     def __new__(cls, name: str = None, level: str = logging.INFO):
         if cls._instance is None:
             cls._instance = super(AsyncLogger, cls).__new__(cls)
-            cls._instance.logger = cls._initialize_logger(name, level)
+            cls._instance._logger = cls._initialize_logger(config.SERVICE_NAME, level)
         return cls._instance
 
     @staticmethod
-    def _initialize_logger(name: str, level: str = logging.INFO):
+    def _initialize_logger(name: str, level: str = logging.INFO) -> logging.Logger:
         logger = logging.getLogger(name)
         logger.setLevel(level)
 
@@ -50,12 +43,8 @@ class AsyncLogger:
         formatter = JSONFormatter()
         ch.setFormatter(formatter)
 
-        logger.addHandler(ch)
+        logger.addHandler(ch)        
         return logger
 
-    def get_logger(self):
-        return self.logger
-
-# Usage:
-# logger = AsyncLogger(__name__).get_logger()
-# logger.info("This is an info message")
+    def get_logger(self) -> logging.Logger:
+        return self._logger
