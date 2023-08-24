@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Body, Depends
 from fastapi.responses import JSONResponse
-from app.db.models import User, PlaceOrderBase, OrderStatus, ExchangeCredentials, OrderStructure
+from app.db.models import PlaceOrderBase, OrderStatus, ExchangeCredentials, OrderStructure
 from app.exchanges.integrations import AbstractExchange
-from app.dependencies import get_exchange_credentials, get_current_user
+from app.dependencies import get_exchange_credentials
 
 router = APIRouter()
 
