@@ -1,45 +1,46 @@
-import aioredis
+import redis.asyncio as redis
 from app.core import config
 from app.core.logging import AsyncLogger
 
 class AsyncRedisService:
-    def __init__(self):
-        self.redis = None
-        self.logger = AsyncLogger("RedisWrapper").get_logger()
+    _instance = None
+    _connection = None
+    _logger = None
 
-    async def initialize(self):
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(AsyncRedisService, cls).__new__(cls)
+            cls._logger = AsyncLogger().get_logger()            
+        return cls._instance
+
+    async def get_connection(self):
         try:
-            self.redis = await aioredis.create_redis_pool("redis://localhost")  # Adjust this according to your Redis setup
-            self.logger.info("Successfully initialized Redis connection.")
+            if not self._connection:
+                self._connection = redis.Redis(host=config.REDIS_HOST, port=config.REDIS_PORT, db=0)
         except Exception as e:
-            self.logger.error(f"Error initializing Redis: {str(e)}")
+            self._logger.error("Error while connecting to Redis: {}".format(e))
+        return self._connection
 
     async def close(self):
         try:
-            if self.redis:
-                self.redis.close()
-                await self.redis.wait_closed()
-                self.logger.info("Successfully closed Redis connection.")
+            if self._connection:
+                await self._connection.close()
+                self._connection = None
         except Exception as e:
-            self.logger.error(f"Error closing Redis connection: {str(e)}")
+            self._logger.error("Error while closing Redis connection: {}".format(e))
 
-    def _format_key(self, exchange: str, symbol: str, side: str) -> str:
-        return config.CACHE_KEY_FORMAT.format(exchange=exchange, symbol=symbol, side=side)
-
-    async def set_position(self, exchange: str, symbol: str, side: str, data: dict):
-        key = self._format_key(exchange, symbol, side)
+    async def get_position(self, key: str):
         try:
-            await self.redis.set(key, data)
-            self.logger.info(f"Successfully set position for key: {key}")
+            conn = await self.get_connection()
+            return await conn.get(key)
         except Exception as e:
-            self.logger.error(f"Error setting position for key {key}: {str(e)}")
+            self._logger.error("Error while getting position from Redis: {}".format(e))
+            raise e  
 
-    async def get_position(self, exchange: str, symbol: str, side: str) -> dict:
-        key = self._format_key(exchange, symbol, side)
+    async def set_position(self, key: str, value: str):
         try:
-            data = await self.redis.get(key)
-            self.logger.info(f"Successfully retrieved position for key: {key}")
-            return data
+            conn = await self.get_connection()
+            await conn.set(key, value)
         except Exception as e:
-            self.logger.error(f"Error retrieving position for key {key}: {str(e)}")
-            return None
+            self._logger.error("Error while setting position in Redis: {}".format(e))
+            raise e        
