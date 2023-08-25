@@ -17,8 +17,7 @@ async def test_close_position_with_open_position(client: AsyncClient, test_user_
     headers = {"Authorization": f"Bearer {test_user_token}"} 
     
     response = await client.post("/position/close_position/", json=mock_bitget_close_position_order, headers=headers)
-    assert response.status_code == 200
-    # Add more assertions based on the successful response's expected structure
+    assert response.status_code == 200    
 
 @pytest.mark.asyncio
 async def test_close_position_unauthenticated(client: AsyncClient, mock_redis_with_position: json, mock_get_user, mock_bitget_close_position_order: json, mock_bitget_place_order_response: OrderStructure):

@@ -161,3 +161,18 @@ def mock_bitget_place_order_response() -> OrderStructure:
     with patch('app.exchanges.integrations.BitgetExchange.place_order', new_callable=AsyncMock, return_value=_mock_place_order) as _mocked:
         yield _mocked
     
+@pytest.fixture
+def mock_bitget_tpsl_order() -> json:
+    return {
+        "symbol": "BTCUSDT",
+        "type": OrderType.TAKE_PROFIT_STOP_LOSS,
+        "side": OrderSide.SELL,
+        "amount": 0.1,
+        "positionAction": PositionAction.OPEN,
+        "exchange": Exchange.BITGET,  
+        "triggerPrice": 37000.00,
+        "takeProfit": 38000.00,
+        "stopLoss": 36000.00,
+        "clientOrderId": "test_order_123",
+        "timeInForce": TimeInForce.GoodTillCancel            
+    }

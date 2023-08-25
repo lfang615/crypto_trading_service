@@ -1,6 +1,6 @@
-import ccxt
+import ccxt.async_support as ccxt
 from abc import ABC, abstractmethod
-from app.db.models import PlaceOrderBase, OrderStructure, OrderType, OrderStatus
+from app.db.models import PlaceOrderBase, OrderStructure, OrderType, PositionAction, TimeInForce
 
 class AbstractExchange(ABC):
 
@@ -67,19 +67,40 @@ class BitgetExchange(AbstractExchange):
         })
 
     async def place_market_order(self, order: PlaceOrderBase) -> OrderStructure:
-        return super().place_market_order(order)
+        return await self.exchange.create_order(order.symbol, OrderType.MARKET.value, order.side.value, order.amount,
+                                           params={'clientOrderId': order.clientOrderId, 'timeInForce': order.timeInForce.value})
     
     async def place_limit_order(self, order: PlaceOrderBase) -> OrderStructure:
-        return super().place_limit_order(order)
+        return await self.exchange.create_order(order.symbol, OrderType.LIMIT.value, order.side.value, order.amount, order.price, 
+                                                params={'clientOrderId': order.clientOrderId, 'timeInForce': order.timeInForce.value})
     
     async def place_stop_limit_order(self, order: PlaceOrderBase) -> OrderStructure:
-        return super().place_stop_limit_order(order)
+        # if order.positionAction == PositionAction.Close:
+        # Validate that there is an open position for the symbol which is stored in Redis
+        return await self.exchange.create_order(order.symbol, OrderType.LIMIT.value, order.side.value, order.amount, order.price,
+                                          params = {'triggerPrice': order.triggerPrice,
+                                                    'clientOrderId': order.clientOrderId,
+                                                    'timeInForce': order.timeInForce.value,
+                                                    'reduceOnly': True if order.positionAction == PositionAction.CLOSE else False
+                                                    })                                             
     
     async def place_stop_market_order(self, order: PlaceOrderBase) -> OrderStructure:
-        return super().place_stop_market_order(order)
+        return await self.exchange.create_order(order.symbol, OrderType.MARKET.value, order.side.value, order.amount,
+                                           params = {'triggerPrice': order.triggerPrice,
+                                                    'clientOrderId': order.clientOrderId,
+                                                    'timeInForce': order.timeInForce.value,
+                                                    'reduceOnly': True if order.positionAction == PositionAction.CLOSE else False
+                                                    })
     
     async def place_tpsl_order(self, order: PlaceOrderBase) -> OrderStructure:
-        return super().place_tpsl_order(order)
+        """
+        Closes the entire amount of the position
+        """
+        return await self.exchange.create_order(order.symbol, OrderType.MARKET.value, order.side.value, order.amount,
+                                           params = {'stopLossPrice': order.stopLoss,
+                                                    'takeProfitPrice': order.takeProfit,
+                                                    'clientOrderId': order.clientOrderId,
+                                                    'timeInForce': order.timeInForce.value,})
 
     async def get_balance(self) -> dict:
         # Implement the method using ccxt's functions for Bitget
@@ -98,19 +119,19 @@ class BybitExchange(AbstractExchange):
     })
     
     async def place_market_order(self, order: PlaceOrderBase) -> OrderStructure:
-        return super().place_market_order(order)
+        pass
     
     async def place_limit_order(self, order: PlaceOrderBase) -> OrderStructure:
-        return super().place_limit_order(order)
+        pass
     
     async def place_stop_limit_order(self, order: PlaceOrderBase) -> OrderStructure:
-        return super().place_stop_limit_order(order)
+        pass
     
     async def place_stop_market_order(self, order: PlaceOrderBase) -> OrderStructure:
-        return super().place_stop_market_order(order)
+        pass
     
     async def place_tpsl_order(self, order: PlaceOrderBase) -> OrderStructure:
-        return super().place_tpsl_order(order)
+        pass
 
     async def get_balance(self) -> dict:
         # Implement the method using ccxt's functions for Bitget

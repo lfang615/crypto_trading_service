@@ -72,6 +72,8 @@ class PlaceOrderBase(BaseModel):
         amount = values.get("amount")
         price = values.get("price")
         trigger_price = values.get("triggerPrice")
+        takeProfit = values.get("takeProfit")
+        stopLoss = values.get("stopLoss")
         
         # If the order_type == limit and 'amount' is None or 'price' is None
         if order_type == OrderType.LIMIT and (amount is None or price is None):
@@ -89,8 +91,8 @@ class PlaceOrderBase(BaseModel):
             raise ValueError("For STOP_MARKET order type, amount and trigger price must be provided.")
         
         # If order_type is take_profit_stop_loss and trigger_price is None
-        if order_type == OrderType.TAKE_PROFIT_STOP_LOSS and trigger_price is None:
-            raise ValueError("For TAKE_PROFIT_STOP_LOSS order type, trigger price must be provided.")
+        if order_type == OrderType.TAKE_PROFIT_STOP_LOSS and (takeProfit is None and stopLoss is None):
+            raise ValueError("For TAKE_PROFIT_STOP_LOSS order type, takeProfit or stopLoss must be provided.")
         
         return values
     
