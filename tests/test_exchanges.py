@@ -42,19 +42,19 @@ class MockExchange(AbstractExchange):
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
-    "order_type, expected_id, price, trigger_price",
+    "order_type, expected_id, price, trigger_price, take_profit, stop_loss",
     [
-        (OrderType.MARKET, "market", None, None),
-        (OrderType.LIMIT, "limit", 25400, None),
-        (OrderType.STOP_LIMIT, "stop_limit", 25400, 25000),
-        (OrderType.STOP_MARKET, "stop_market", None, 25000),
-        (OrderType.TAKE_PROFIT_STOP_LOSS, "tpsl", 20000, 25000),
+        (OrderType.MARKET, "market", None, None, None, None),
+        (OrderType.LIMIT, "limit", 25400, None, None, None),
+        (OrderType.STOP_LIMIT, "stop_limit", 25400, 25000, None, None),
+        (OrderType.STOP_MARKET, "stop_market", None, 25000, None, None),
+        (OrderType.TAKE_PROFIT_STOP_LOSS, "tpsl", 20000, 25000, None, 19500),
     ]
 )
-async def test_place_order(order_type, expected_id, price, trigger_price):
+async def test_place_order(order_type, expected_id, price, trigger_price, take_profit, stop_loss):
     mock_exchange = MockExchange("api_key", "api_secret")
     # mock_exchange.name = "bitget"
-    order = PlaceOrderBase(type=order_type, symbol="BTCUSDT", side="buy", amount=1, positionAction="open", exchange="bitget", price=price, triggerPrice=trigger_price)    
+    order = PlaceOrderBase(type=order_type, symbol="BTCUSDT", side="buy", amount=1, positionAction="open", exchange="bitget", price=price, triggerPrice=trigger_price, takeProfit=take_profit, stopLoss=stop_loss)    
     result = await mock_exchange.place_order(order)
     assert result.id == expected_id
 
