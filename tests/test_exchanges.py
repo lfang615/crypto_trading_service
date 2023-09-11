@@ -5,7 +5,7 @@ PlaceOrderBase, OrderType, OrderStructure
 from app.db.models import OrderSide, PositionAction, Exchange, TimeInForce
 
 def test_create_exchange():
-    # Test creation of BitgetExchange
+    # Test creation of BitgetExchangey
     exchange = AbstractExchange.create("bitget", "api_key", "api_secret")
     assert isinstance(exchange, BitgetExchange)
 
