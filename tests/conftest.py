@@ -5,10 +5,12 @@ from typing import Optional
 from app.main import app as fastapi_app
 from app.db.models import UserInDB, PlaceOrderBase, OrderSide, OrderType, PositionAction, Exchange, TimeInForce, ExchangeCredentials, OrderStructure
 from app.auth.jwt import create_access_token
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 from app.db.services.mongodbservice import AsyncMongoDBService
 from app.db.services.redisservice import AsyncRedisService
+from app.db.services.kafkaproducer import KafkaProducer
 from app.db.repositories.userrepository import UserRepository
+from app.db.repositories.orderrepository import OrderRepository
 from app.exchanges.integrations import AbstractExchange
 import json
 
@@ -67,6 +69,22 @@ def mock_create_user(monkeypatch, mock_db_service: AsyncMongoDBService):
     
     # Instantiate and return the UserRepository with the mocked method
     return UserRepository(mock_db_service)
+
+@pytest.fixture
+def mock_order_repository_create(monkeypatch, mock_db_service: AsyncMongoDBService):
+    async def _mock_create(order: OrderStructure):
+        return "mocked_id"
+    
+    with patch('app.db.repositories.orderrepository.OrderRepository.create', new_callable=AsyncMock, side_effect=_mock_create) as _mocked:
+        yield _mocked
+
+@pytest.fixture
+def mock_kafka_producer():
+     async def _mock_send_order(topic: str, order_id: str, client_oid: str):
+        return None
+     
+     with patch('app.db.services.kafkaproducer.KafkaProducer.send_order', new_callable=AsyncMock, side_effect=_mock_send_order) as _mocked:
+        yield _mocked
 
 @pytest.fixture
 def limit_order() -> json:    
@@ -158,7 +176,7 @@ def mock_bitget_place_order_response() -> OrderStructure:
     async def _mock_place_order(*args, **kwargs):
         return mock_order_structure
 
-    with patch('app.exchanges.integrations.BitgetExchange.place_order', new_callable=AsyncMock, return_value=_mock_place_order) as _mocked:
+    with patch('app.exchanges.integrations.BitgetExchange.place_order', new_callable=AsyncMock, side_effect=_mock_place_order) as _mocked:
         yield _mocked
     
 @pytest.fixture

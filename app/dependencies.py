@@ -3,6 +3,7 @@ from typing import Union
 from app.core import config
 from app.core.logging import AsyncLogger
 from app.db.models import UserInDB, PlaceOrderBase, ExchangeCredentials, OrderType
+from app.db.repositories.orderrepository import OrderRepository
 from app.db.services.mongodbservice import AsyncMongoDBService
 from app.db.repositories.userrepository import UserRepository
 from app.auth.jwt import oauth2_scheme, TokenData, JWTError, jwt, HTTPException, status
@@ -14,6 +15,9 @@ def get_db_service() -> AsyncMongoDBService:
 
 def get_user_repository(db_service: AsyncMongoDBService = Depends(get_db_service)) -> UserRepository:
     return UserRepository(db_service)
+
+def get_order_repository(db_service: AsyncMongoDBService = Depends(get_db_service)) -> OrderRepository:
+    return OrderRepository(db_service)
 
 # To get the current user from the token
 async def get_current_user(token: str = Depends(oauth2_scheme), user_repository = Depends(get_user_repository)) -> Union[UserInDB, None]:
